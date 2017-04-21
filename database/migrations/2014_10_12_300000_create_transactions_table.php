@@ -1,0 +1,55 @@
+<?php
+
+use Illuminate\Database\Schema\Builder;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateTransactionsTable extends Migration
+{
+    /**
+     * @var Builder
+     */
+    public $builder;
+
+    /**
+     * CreateTransactionsTable constructor.
+     */
+    public function __construct()
+    {
+        $this->builder = app(Builder::class);
+    }
+
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        $this->builder->create('transactions', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->integer('amount');
+
+            $table->json('meta')->nullable();
+
+            $table->enum('state', ['pending', 'succeed', 'failed', 'canceled']);
+
+            $table->unsignedInteger('subject_id');
+
+            $table->string('subject_type');
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        $this->builder->dropIfExists('transactions');
+    }
+}
