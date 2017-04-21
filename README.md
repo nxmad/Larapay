@@ -7,10 +7,10 @@
     <a href="https://packagist.org/packages/balatsky/larapay">
         <img src="https://img.shields.io/packagist/dt/balatsky/larapay.svg?style=flat-square" alt="Total Downloads">
     </a>
-    <a href="">
+    <a href="https://packagist.org/packages/balatsky/larapay">
         <img src="https://img.shields.io/packagist/v/balatsky/larapay.svg?style=flat-square" alt="Latest Version">
     </a>
-    <a href="https://packagist.org/packages/balatsky/larapay">
+    <a href="https://styleci.io/repos/88980904">
         <img src="https://styleci.io/repos/88980904/shield" alt="StyleCI">
     </a>
 </p>
