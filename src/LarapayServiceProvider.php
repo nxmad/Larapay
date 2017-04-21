@@ -6,7 +6,7 @@ use Skylex\Larapay\GatewayManager;
 use Skylex\Larapay\Contracts\Payments;
 use Illuminate\Support\ServiceProvider as BaseProvider;
 
-class ServiceProvider extends BaseProvider
+class LarapayServiceProvider extends BaseProvider
 {
     /**
      * Register Service Provider.

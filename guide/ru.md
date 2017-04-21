@@ -22,9 +22,9 @@
     ``` bash
     $ php artisan migrate
     ```
-2. Для доступа к транзакция понадобится модель `Transaction` наследующая `Skylex\Larapay\Models\Transaction`
-3. Для значения `transaction` в конфиге `payments.php` пропишите
-    обозначим путь до созданной модели, по умолчанию будет `\App\Transaction::class` 
+2. Для доступа к транзакциям понадобится модель `Transaction` наследующая `Skylex\Larapay\Models\Transaction`
+3. Для значения `transaction` в конфиге `payments.php`
+    обозначим путь до созданной модели, по умолчанию будет `App\Transaction::class` 
 4. Так же надо добавить трейт `Skylex\Larapay\Traits\Transactions` к планируемому инициатору
     транзакций. (Например, к модели `User`)
 5. Осталось только настроить модули платежных систем,
@@ -32,4 +32,4 @@
     
 ### Пример использования
 Пример использования с комментариями находится
-    в [Examples/PaymentController.php](../blob/master/src/Examples/PaymentController.php)
+    в [Examples/PaymentController.php](../src/Examples/PaymentController.php)

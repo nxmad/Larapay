@@ -40,7 +40,7 @@ abstract class Gateway implements GatewayContract
     protected $custom;
 
     /**
-     * Sign outcome request (insert request signature in request parameters)
+     * Sign outcome request (insert request signature in request parameters).
      *
      * @param RepositoryContract $data
      *
@@ -67,7 +67,7 @@ abstract class Gateway implements GatewayContract
     }
 
     /**
-     * Get redirect to payment gateway
+     * Get redirect to payment gateway.
      *
      * @param Transaction $transaction
      *

@@ -4,14 +4,14 @@
     <a href="./LICENSE.md">
         <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square" alt="Software License">
     </a>
-    <a href="https://packagist.org/packages/laravel/socialite">
-        <img src="https://img.shields.io/packagist/dt/balatsky/payments.svg?style=flat-square" alt="Total Downloads">
+    <a href="https://packagist.org/packages/balatsky/larapay">
+        <img src="https://img.shields.io/packagist/dt/balatsky/larapay.svg?style=flat-square" alt="Total Downloads">
     </a>
     <a href="">
-        <img src="https://img.shields.io/packagist/v/balatsky/payments.svg?style=flat-square" alt="Latest Version">
+        <img src="https://img.shields.io/packagist/v/balatsky/larapay.svg?style=flat-square" alt="Latest Version">
     </a>
-    <a href="https://packagist.org/packages/laravel/socialite">
-        <img src="https://styleci.io/repos/84937825/shield" alt="StyleCI">
+    <a href="https://packagist.org/packages/balatsky/larapay">
+        <img src="https://styleci.io/repos/88980904/shield" alt="StyleCI">
     </a>
 </p>
 
@@ -27,7 +27,7 @@ Install
    Skylex\Larapay\LarapayServiceProvider::class,
    ```
 
-3. Publish default configuration file `payments.php`
+3. Publish default configuration file `larapay.php`
    ``` php
    $ php artisan vendor:publish
    ```
