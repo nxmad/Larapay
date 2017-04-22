@@ -1,12 +1,11 @@
 <?php
 
-namespace Skylex\Larapay\Providers;
+namespace Skylex\Larapay;
 
-use Skylex\Larapay\GatewayManager;
 use Skylex\Larapay\Contracts\Payments;
-use Illuminate\Support\ServiceProvider as BaseProvider;
+use Illuminate\Support\ServiceProvider;
 
-class LarapayServiceProvider extends BaseProvider
+class LarapayServiceProvider extends ServiceProvider
 {
     /**
      * Register Service Provider.
@@ -15,7 +14,7 @@ class LarapayServiceProvider extends BaseProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom($this->getConfigPath(), 'payments');
+        $this->mergeConfigFrom($this->getConfigPath(), 'larapay');
 
         $this->app->singleton(Payments::class, function ($app) {
             return new GatewayManager($app);
@@ -33,7 +32,7 @@ class LarapayServiceProvider extends BaseProvider
             $this->getConfigPath() => config_path('larapay.php')
         ]);
 
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
     }
 
     /**
@@ -43,6 +42,6 @@ class LarapayServiceProvider extends BaseProvider
      */
     protected function getConfigPath(): string
     {
-        return __DIR__ . '/../../config/larapay.php';
+        return __DIR__ . '/../config/larapay.php';
     }
 }
