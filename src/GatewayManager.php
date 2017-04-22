@@ -93,7 +93,11 @@ class GatewayManager implements Contracts\Payments
             throw new InvalidArgumentException("Implementation for [{$gateway}] isn't installed.");
         }
 
-        $config   = $this->app['config']->get('larapay.gateways')[$gateway];
+        if (! $this->app['config']->has("larapay.gateways.{$implementation}")) {
+            throw new InvalidArgumentException("No config found for {$implementation}.");
+        }
+
+        $config   = $this->app['config']->get("larapay.gateways.{$implementation}");
         $instance = new $implementation($config);
 
         if (! $instance instanceof GatewayContract) {

@@ -52,17 +52,17 @@ trait Transactions
     /**
      * Determine if Model's balance is enough for transaction
      *
-     * @param $transaction
+     * @param Transaction $transaction
      *
      * @return bool
      */
-    public function canAfford($transaction): bool
+    public function canAfford(Transaction $transaction): bool
     {
-        if (! isset($this->keepBalance) or ! $this->keepBalance) {
+        if (! $field = $this->keepBalance()) {
             return true;
         }
 
-        return $this->{$this->keepBalance} >= abs($transaction->amount);
+        return $this->attributes[$field] >= abs($transaction->getAttributeFromArray('amount'));
     }
 
     /**
@@ -84,7 +84,7 @@ trait Transactions
      */
     protected function getTransactionClass(): string
     {
-        return app()->config->get('payments.transaction');
+        return app()->config->get('larapay.transaction');
     }
 
     /**
@@ -104,9 +104,9 @@ trait Transactions
     /**
      * Determine if subject need to keeping balance.
      *
-     * @return bool
+     * @return bool|string
      */
-    public function keepBalance(): bool
+    public function keepBalance()
     {
         if (isset($this->keepBalance)) {
             return $this->keepBalance;
