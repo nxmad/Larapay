@@ -58,7 +58,9 @@ trait Transactions
      */
     public function canAfford(Transaction $transaction): bool
     {
-        if (! $field = $this->keepBalance()) {
+        $field = $this->keepBalance();
+
+        if (! $field) {
             return true;
         }
 

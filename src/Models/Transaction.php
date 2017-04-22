@@ -81,7 +81,7 @@ class Transaction extends Model
      */
     public function makeSuccessful()
     {
-        $this->status = 'succeed';
+        $this->state = 'successful';
         $this->save();
 
         $keeping = $this->subject->keepBalance();
@@ -96,7 +96,7 @@ class Transaction extends Model
      */
     public function makeFailed()
     {
-        $this->status = 'failed';
+        $this->state = 'failed';
         $this->save();
     }
 
@@ -105,7 +105,7 @@ class Transaction extends Model
      */
     public function makeCanceled()
     {
-        $this->status = 'canceled';
+        $this->state = 'canceled';
         $this->save();
     }
 }

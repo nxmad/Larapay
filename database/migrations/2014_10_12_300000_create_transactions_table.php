@@ -33,7 +33,7 @@ class CreateTransactionsTable extends Migration
 
             $table->json('meta')->nullable();
 
-            $table->enum('state', ['pending', 'succeed', 'failed', 'canceled']);
+            $table->enum('state', ['pending', 'successful', 'failed', 'canceled']);
 
             $table->unsignedInteger('subject_id');
 
