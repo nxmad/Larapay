@@ -40,20 +40,43 @@ abstract class Gateway implements GatewayContract
     protected $custom;
 
     /**
-     * Sign outcome request (insert request signature in request parameters).
+     * Payment process method.
+     * Possible values are below.
      *
-     * @param RepositoryContract $data
-     *
-     * @return string
+     * @var int
      */
-    abstract public function sign(RepositoryContract $data): string;
+    protected $method = self::LARAPAY_GET_REDIRECT;
 
     /**
-     * Get redirect url to payment gateway.
+     * Classic redirection with GET parameters.
+     */
+    const LARAPAY_GET_REDIRECT = 0;
+
+    /**
+     * Redirect with POST data for old gateways (using hack with form).
+     */
+    const LARAPAY_POST_REDIRECT = 1;
+
+    /**
+     * No redirect method (e.g. for card payments)
+     */
+    const LARAPAY_NO_REDIRECT = 2;
+
+    /**
+     * Sign outcome request (insert request signature in request parameters).
+     *
+     * @param array $data
      *
      * @return string
      */
-    abstract public function getRedirectUrl(): string;
+    abstract public function sign(array $data): string;
+
+    /**
+     * Custom gateway logic instead redirect.
+     *
+     * @return mixed
+     */
+    abstract public function noRedirect();
 
     /**
      * Gateway constructor.
@@ -67,21 +90,23 @@ abstract class Gateway implements GatewayContract
     }
 
     /**
-     * Get redirect to payment gateway.
+     * Prepare redirect, set basic data and sign it.
      *
      * @param Transaction $transaction
      *
-     * @return RedirectResponse
+     * @return self
      *
      * @throws RuntimeException
      */
-    public function redirect(Transaction $transaction): RedirectResponse
+    public function prepare(Transaction $transaction): self
     {
         $this->fill([
-            'id'        => $transaction->getPrimaryValue(),
-            'amount'    => $transaction->amount,
-            'signature' => $this->sign($this->custom)
+            'amount'      => $transaction->getAmount(),
+            'description' => $transaction->getDescription(),
+            'id'          => $transaction->getPrimaryValue(),
         ]);
+
+        $this->signature = $this->sign($this->custom->all());
 
         foreach ($this->required as $field) {
             if (! $this->custom->has($this->getAlias($field))) {
@@ -89,7 +114,29 @@ abstract class Gateway implements GatewayContract
             }
         }
 
-        return RedirectResponse::create($this->getRedirectUrl() . '?' . http_build_query($this->custom->all()));
+        return $this;
+    }
+
+    /**
+     * Process payment.
+     *
+     * @param Transaction $transaction
+     * @param int $method
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function process(Transaction $transaction, $method = self::LARAPAY_GET_REDIRECT)
+    {
+        $this->prepare($transaction);
+        $method = func_num_args() == 2 ? $method : $this->method;
+
+        if ($method == self::LARAPAY_NO_REDIRECT) {
+            return $this->noRedirect();
+        }
+
+        return view('larapay::form', [
+            ''
+        ]);
     }
 
     /**
@@ -102,7 +149,7 @@ abstract class Gateway implements GatewayContract
     public function fill(array $parameters): self
     {
         foreach ($parameters as $key => $value) {
-            $this->setCustom($key, $value);
+            $this->set($key, $value);
         }
 
         return $this;
@@ -111,16 +158,33 @@ abstract class Gateway implements GatewayContract
     /**
      * Set custom field value respecting aliases.
      *
-     * @param string $field
-     * @param        $value
+     * @param $field
+     * @param $value
      *
      * @return self
      */
-    public function setCustom(string $field, $value): self
+    public function set($field, $value = null): self
     {
+        if (is_array($field)) {
+            return $this->fill($field);
+        }
+
         $this->custom->set($this->getAlias($field), $value);
 
         return $this;
+    }
+
+    /**
+     * Magic set method.
+     *
+     * @param $name
+     * @param $value
+     *
+     * @return Gateway
+     */
+    public function __set($name, $value)
+    {
+        return self::set(...func_get_args());
     }
 
     /**
@@ -131,9 +195,21 @@ abstract class Gateway implements GatewayContract
      *
      * @return mixed
      */
-    public function getCustom(string $field, $default = null)
+    public function get(string $field, $default = null)
     {
         return $this->custom->get($this->getAlias($field), $default);
+    }
+
+    /**
+     * Magic get method.
+     *
+     * @param $name
+     *
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return self::get(...func_get_args());
     }
 
     /**

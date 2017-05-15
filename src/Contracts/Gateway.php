@@ -3,20 +3,18 @@
 namespace Skylex\Larapay\Contracts;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Skylex\Larapay\Models\Transaction;
-use Illuminate\Contracts\Config\Repository;
 
 interface Gateway
 {
     /**
      * Sign outcome request data.
      *
-     * @param Repository $data
+     * @param array $data
      *
      * @return string
      */
-    public function sign(Repository $data): string;
+    public function sign(array $data): string;
 
     /**
      * Determine if request was sent originally from payment gateway.
@@ -28,18 +26,11 @@ interface Gateway
     public function handle(Request $request): bool;
 
     /**
-     * Get redirect url to payment gateway.
-     *
-     * @return string
-     */
-    public function getRedirectUrl(): string;
-
-    /**
-     * Return redirect to payment processor.
+     * Redirect to payment processor.
      *
      * @param Transaction $transaction
      *
-     * @return RedirectResponse
+     * @return mixed
      */
-    public function redirect(Transaction $transaction): RedirectResponse;
+    public function redirect(Transaction $transaction);
 }

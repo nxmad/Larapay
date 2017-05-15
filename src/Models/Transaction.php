@@ -31,16 +31,6 @@ class Transaction extends Model
     protected $accuracy = 2;
 
     /**
-     * Get primary value.
-     *
-     * @return mixed
-     */
-    public function getPrimaryValue()
-    {
-        return $this->{$this->primaryKey};
-    }
-
-    /**
      * Get amount of transaction respecting accuracy.
      *
      * @param $value
@@ -74,6 +64,37 @@ class Transaction extends Model
     public function subject()
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Get primary value.
+     *
+     * @return mixed
+     */
+    public function getPrimaryValue()
+    {
+        return $this->{$this->primaryKey};
+    }
+
+    /**
+     * Get Transaction amount.
+     *
+     * @return mixed
+     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * Get default payment description.
+     * You have to override this method.
+     *
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return 'Payment';
     }
 
     /**

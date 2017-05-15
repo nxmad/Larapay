@@ -17,7 +17,7 @@ class LarapayServiceProvider extends ServiceProvider
         $this->mergeConfigFrom($this->getConfigPath(), 'larapay');
 
         $this->app->singleton(Payments::class, function ($app) {
-            return new GatewayManager($app);
+            return new GatewayManager($app['config']);
         });
     }
 
@@ -29,10 +29,12 @@ class LarapayServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            $this->getConfigPath() => config_path('larapay.php')
+            $this->getConfigPath() => config_path('larapay.php'),
         ]);
 
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadViewsFrom(__DIR__ . '/../files/views', 'larapay');
+
+        $this->loadMigrationsFrom(__DIR__ . '/../files/database/migrations');
     }
 
     /**
@@ -42,6 +44,6 @@ class LarapayServiceProvider extends ServiceProvider
      */
     protected function getConfigPath(): string
     {
-        return __DIR__ . '/../config/larapay.php';
+        return __DIR__ . '/../files/config/larapay.php';
     }
 }

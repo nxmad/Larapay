@@ -1,6 +1,6 @@
 {
   "name": "balatsky/larapay",
-  "description": "Flex but powerful multi-gateway payment processing library for Laravel 5",
+  "description": "Powerful multi-gateway payment processing library designed to make life easier in Laravel 5",
   "keywords": [
     "skylex",
     "larapay",
@@ -8,10 +8,10 @@
     "transactions"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/Balatsky/Payments",
+  "homepage": "https://skylex.pro/dev/skylex",
   "support": {
-    "issues": "https://github.com/Balatsky/Payments/issues",
-    "source": "https://github.com/Balatsky/Payments"
+    "issues": "https://github.com/Balatsky/Larapay/issues",
+    "source": "https://github.com/Balatsky/Larapay"
   },
   "authors": [
     {
@@ -29,7 +29,11 @@
   "autoload": {
     "psr-4": {
       "Skylex\\Larapay\\": "src"
-    }
+    },
+
+    "files": [
+      "files/helpers.php"
+    ]
   },
   "scripts": {
     "test": "vendor/bin/phpunit"

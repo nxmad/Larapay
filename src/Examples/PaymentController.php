@@ -18,7 +18,7 @@ class PaymentController
 
     /**
      * PaymentController constructor.
-     * Resolve by Dependency Injection.
+     * Resolving by Dependency Injection.
      *
      * @param Payments $payments
      */

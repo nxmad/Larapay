@@ -2,31 +2,32 @@
 
 namespace Skylex\Larapay;
 
+use RuntimeException;
 use InvalidArgumentException;
-use Illuminate\Foundation\Application;
-use Skylex\Larapay\Contracts\Gateway as GatewayContract;
+use Skylex\Larapay\Abstracts\Gateway;
+use Illuminate\Contracts\Config\Repository;
 
 class GatewayManager implements Contracts\Payments
 {
     /**
-     * The application instance.
+     * The global GatewayManager config.
      *
-     * @var Application
+     * @var Repository
      */
-    protected $app;
+    protected $config;
 
     /**
      * Create a new manager instance.
      *
-     * @param Application $app
+     * @param Repository $config
      */
-    public function __construct(Application $app)
+    public function __construct(Repository $config)
     {
-        $this->app = $app;
+        $this->config = $config;
     }
 
     /**
-     * The list of driver implementations.
+     * The list of default implementations.
      *
      * @var array
      */
@@ -46,9 +47,9 @@ class GatewayManager implements Contracts\Payments
      *
      * @param string $gateway
      *
-     * @return GatewayContract
+     * @return Gateway
      */
-    public function gateway(string $gateway): GatewayContract
+    public function gateway(string $gateway): Gateway
     {
         if (! isset($this->created[$gateway])) {
             $this->created[$gateway] = $this->createGateway($gateway);
@@ -77,33 +78,28 @@ class GatewayManager implements Contracts\Payments
      *
      * @param string $gateway
      *
-     * @return GatewayContract
+     * @return Gateway
      *
      * @throws InvalidArgumentException
      */
-    protected function createGateway(string $gateway): GatewayContract
+    protected function createGateway(string $gateway): Gateway
     {
         if (! isset($this->gateways[$gateway])) {
-            throw new InvalidArgumentException("Gateway [{$gateway}] not found.");
+            throw new InvalidArgumentException("Gateway [{$gateway}] was not found.");
         }
 
         $implementation = $this->gateways[$gateway];
 
         if (! class_exists($implementation)) {
-            throw new InvalidArgumentException("Implementation for [{$gateway}] isn't installed.");
+            throw new RuntimeException("Class [{$implementation}] was not found.");
         }
 
-        if (! $this->app['config']->has("larapay.gateways.{$implementation}")) {
-            throw new InvalidArgumentException("No config found for {$implementation}.");
+        if (! $this->config->has("larapay.gateways.{$implementation}")) {
+            throw new RuntimeException("No config found for {$implementation}.");
         }
 
-        $config   = $this->app['config']->get("larapay.gateways.{$implementation}");
-        $instance = new $implementation($config);
+        $config = $this->config->get("larapay.gateways.{$implementation}");
 
-        if (! $instance instanceof GatewayContract) {
-            throw new InvalidArgumentException("{$implementation} is not valid gateway implementation.");
-        }
-
-        return $instance;
+        return new $implementation($config);
     }
 }
