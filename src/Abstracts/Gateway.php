@@ -74,7 +74,7 @@ abstract class Gateway implements GatewayContract
      *
      * @param array $config
      */
-    public function __construct(array $config)
+    public function __construct(array $config = [])
     {
         $this->custom = new Repository;
         $this->config = new Repository($config);
@@ -223,7 +223,7 @@ abstract class Gateway implements GatewayContract
      */
     public function getSlug(): string
     {
-        return str_slug(array_last(explode('\\', __CLASS__)));
+        return str_slug(array_last(explode('\\', get_class($this))));
     }
 
     /**
