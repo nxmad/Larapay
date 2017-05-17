@@ -26,11 +26,9 @@ interface Gateway
     public function handle(Request $request): bool;
 
     /**
-     * Redirect to payment processor.
+     * Get gateway's interaction address.
      *
-     * @param Transaction $transaction
-     *
-     * @return mixed
+     * @return string
      */
-    public function redirect(Transaction $transaction);
+    public function getInteractionUrl(): string;
 }

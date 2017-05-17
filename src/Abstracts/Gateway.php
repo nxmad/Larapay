@@ -4,10 +4,8 @@ namespace Skylex\Larapay\Abstracts;
 
 use RuntimeException;
 use Illuminate\Config\Repository;
-use Illuminate\Http\RedirectResponse;
 use Skylex\Larapay\Models\Transaction;
 use Skylex\Larapay\Contracts\Gateway as GatewayContract;
-use Illuminate\Contracts\Config\Repository as RepositoryContract;
 
 abstract class Gateway implements GatewayContract
 {
@@ -43,24 +41,24 @@ abstract class Gateway implements GatewayContract
      * Payment process method.
      * Possible values are below.
      *
-     * @var int
+     * @var string
      */
     protected $method = self::LARAPAY_GET_REDIRECT;
 
     /**
      * Classic redirection with GET parameters.
      */
-    const LARAPAY_GET_REDIRECT = 0;
+    const LARAPAY_GET_REDIRECT = 'GET';
 
     /**
      * Redirect with POST data for old gateways (using hack with form).
      */
-    const LARAPAY_POST_REDIRECT = 1;
+    const LARAPAY_POST_REDIRECT = 'POST';
 
     /**
      * No redirect method (e.g. for card payments)
      */
-    const LARAPAY_NO_REDIRECT = 2;
+    const LARAPAY_NO_REDIRECT = '_';
 
     /**
      * Sign outcome request (insert request signature in request parameters).
@@ -70,13 +68,6 @@ abstract class Gateway implements GatewayContract
      * @return string
      */
     abstract public function sign(array $data): string;
-
-    /**
-     * Custom gateway logic instead redirect.
-     *
-     * @return mixed
-     */
-    abstract public function noRedirect();
 
     /**
      * Gateway constructor.
@@ -90,16 +81,15 @@ abstract class Gateway implements GatewayContract
     }
 
     /**
-     * Prepare redirect, set basic data and sign it.
+     * Process payment.
      *
      * @param Transaction $transaction
      *
-     * @return self
-     *
-     * @throws RuntimeException
+     * @return mixed
      */
-    public function prepare(Transaction $transaction): self
+    public function interact(Transaction $transaction)
     {
+        $this->prepare($transaction);
         $this->fill([
             'amount'      => $transaction->getAmount(),
             'description' => $transaction->getDescription(),
@@ -110,33 +100,47 @@ abstract class Gateway implements GatewayContract
 
         foreach ($this->required as $field) {
             if (! $this->custom->has($this->getAlias($field))) {
-                throw new RuntimeException("Required field [$field] is not presented.");
+                throw new RuntimeException("Required field [{$field}] is not presented.");
             }
         }
 
-        return $this;
-    }
+        if ($this->method == self::LARAPAY_NO_REDIRECT) {
+            return $this->customBehavior();
+        }
 
-    /**
-     * Process payment.
-     *
-     * @param Transaction $transaction
-     * @param int $method
-     *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function process(Transaction $transaction, $method = self::LARAPAY_GET_REDIRECT)
-    {
-        $this->prepare($transaction);
-        $method = func_num_args() == 2 ? $method : $this->method;
-
-        if ($method == self::LARAPAY_NO_REDIRECT) {
-            return $this->noRedirect();
+        if ($this->method == self::LARAPAY_GET_REDIRECT) {
+            return redirect()->away($this->getInteractionUrl() . '?' . http_build_query($this->custom->all()));
         }
 
         return view('larapay::form', [
-            ''
+            'method' => 'POST',
+            'data'   => $this->custom->all(),
+            'action' => $this->getInteractionUrl(),
         ]);
+    }
+
+    /**
+     * Custom gateway logic instead redirect.
+     * You can override this method in children class.
+     */
+    public function customBehavior() {}
+
+    /**
+     * Prepare Transaction.
+     * You can override this method in children class.
+     *
+     * @param Transaction $transaction
+     */
+    public function prepare(Transaction $transaction) {}
+
+    /**
+     * Determine if this gateway needs redirect.
+     *
+     * @return bool
+     */
+    public function needRedirect()
+    {
+        return $this->method != self::LARAPAY_NO_REDIRECT;
     }
 
     /**

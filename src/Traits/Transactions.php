@@ -40,7 +40,7 @@ trait Transactions
     {
         $transaction = $this->setup(...func_get_args());
 
-        if ($state == 'success') {
+        if ($state == 'successful') {
             $transaction->makeSuccessful();
         } else {
             $transaction->save();

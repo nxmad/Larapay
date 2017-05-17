@@ -23,5 +23,5 @@ interface Payments
      *
      * @return self
      */
-    public function extend(string $driver, string $implementation): self;
+    public function extend(string $driver, string $implementation);
 }
