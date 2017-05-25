@@ -7,11 +7,43 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     /**
+     * The state means user failed payment for Transaction.
+     */
+    const STATE_FAILED = 'failed';
+
+    /**
+     * The state means Transaction in pending.
+     */
+    const STATE_PENDING = 'pending';
+
+    /**
+     * The state means Transaction was canceled by user or admin.
+     */
+    const STATE_CANCELED = 'canceled';
+
+    /**
+     * The state means Transaction succeed.
+     */
+    const STATE_SUCCESSFUL = 'successful';
+
+    /**
+     * The allowed Transaction states.
+     *
+     * @var array
+     */
+    protected $allowedStates = [
+        self::STATE_FAILED,
+        self::STATE_PENDING,
+        self::STATE_CANCELED,
+        self::STATE_SUCCESSFUL,
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = ['amount', 'subject', 'state', 'subject_id', 'subject_type'];
+    protected $fillable = ['amount', 'meta', 'state', 'subject_id', 'subject_type'];
 
     /**
      * The attributes that should be cast to native types.
@@ -23,14 +55,6 @@ class Transaction extends Model
     ];
 
     /**
-     * The accuracy for conversions float to integer when saving to database.
-     * 0 if you don't need any conversions.
-     *
-     * @var int
-     */
-    protected $accuracy = 2;
-
-    /**
      * Get amount of transaction respecting accuracy.
      *
      * @param $value
@@ -39,7 +63,7 @@ class Transaction extends Model
      */
     public function getAmountAttribute($value)
     {
-        return $value / pow(10, $this->accuracy);
+        return $value / pow(10, ($this->subject_type)::ACCURACY);
     }
 
     /**
@@ -51,7 +75,7 @@ class Transaction extends Model
      */
     public function setAmountAttribute($value): self
     {
-        $this->attributes['amount'] = $value * pow(10, $this->accuracy);
+        $this->attributes['amount'] = $value * pow(10, ($this->subject_type)::ACCURACY);
 
         return $this;
     }
@@ -98,35 +122,46 @@ class Transaction extends Model
     }
 
     /**
-     * Mark transaction as successful.
+     * Update state, without respecting balance.
+     *
+     * @param string|null $state
+     *
+     * @return $this
      */
-    public function makeSuccessful()
+    public function __invoke(string $state = null)
     {
-        $this->state = 'successful';
-        $this->save();
-
-        $keeping = $this->subject->keepBalance();
-
-        if ($keeping) {
-            $this->subject->increment($keeping, $this->attributes['amount']);
+        if (! is_null($state)) {
+            $this->state = $state;
         }
+
+        if ($this->state == self::STATE_SUCCESSFUL) {
+            $this->subject->increment(($this->subject_type)::KEEP, $this->getAttributeFromArray('amount'));
+        }
+
+        $this->save();
+
+        return $this;
     }
 
     /**
-     * Mark transaction as failed.
+     * Catch make* methods.
+     * E.g. ->makeCanceled();
+     *
+     * @param string $method
+     * @param array $parameters
+     *
+     * @return $this|mixed
      */
-    public function makeFailed()
+    public function __call($method, $parameters)
     {
-        $this->state = 'failed';
-        $this->save();
-    }
+        if (strpos($method, 'make') !== false) {
+            $state = mb_strtolower(str_replace('make', '', $method));
 
-    /**
-     * Mark transaction as canceled.
-     */
-    public function makeCanceled()
-    {
-        $this->state = 'canceled';
-        $this->save();
+            if (in_array($state, $this->allowedStates)) {
+                return $this($state);
+            }
+        }
+
+        return parent::__call($method, $parameters);
     }
 }

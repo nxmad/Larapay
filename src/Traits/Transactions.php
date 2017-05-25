@@ -15,16 +15,13 @@ trait Transactions
      *
      * @return mixed
      */
-    public function setup(int $amount, array $meta = [], string $state = 'pending')
+    public function setup(int $amount, array $meta = [], string $state = Transaction::STATE_PENDING)
     {
-        $subject_id   = $this->getPrimaryValue();
         $subject_type = __CLASS__;
+        $subject_id   = $this->getPrimaryValue();
+        $class        = $this->getTransactionClass();
 
-        $class       = $this->getTransactionClass();
-        $transaction = (new $class)
-            ->fill(compact('amount', 'meta', 'state', 'subject_id', 'subject_type'));
-
-        return $transaction;
+        return (new $class)->fill(compact('subject_id', 'subject_type', 'amount', 'meta', 'state'));
     }
 
     /**
@@ -36,17 +33,11 @@ trait Transactions
      *
      * @return Transaction
      */
-    public function transaction(int $amount, array $meta = [], string $state = 'pending'): Transaction
+    public function transaction(int $amount, array $meta = [], string $state = Transaction::STATE_PENDING): Transaction
     {
         $transaction = $this->setup(...func_get_args());
 
-        if ($state == 'successful') {
-            $transaction->makeSuccessful();
-        } else {
-            $transaction->save();
-        }
-
-        return $transaction;
+        return $transaction($state);
     }
 
     /**
@@ -58,7 +49,7 @@ trait Transactions
      */
     public function canAfford(Transaction $transaction): bool
     {
-        $field = $this->keepBalance();
+        $field = self::KEEP;
 
         if (! $field) {
             return true;
@@ -75,6 +66,7 @@ trait Transactions
     public function recalculateBalance()
     {
         return $this->transactions()
+            ->where('state', Transaction::STATE_SUCCESSFUL)
             ->get()
             ->sum('amount');
     }
@@ -96,25 +88,7 @@ trait Transactions
      */
     public function getPrimaryValue()
     {
-        if (isset($this->primaryKey)) {
-            return $this->{$this->primaryKey};
-        }
-
-        return false;
-    }
-
-    /**
-     * Determine if subject need to keeping balance.
-     *
-     * @return bool|string
-     */
-    public function keepBalance()
-    {
-        if (isset($this->keepBalance)) {
-            return $this->keepBalance;
-        }
-
-        return false;
+        return $this->{$this->primaryKey};
     }
 
     /**

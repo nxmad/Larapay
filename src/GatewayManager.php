@@ -37,9 +37,7 @@ class GatewayManager implements Contracts\Payments
      *
      * @var array
      */
-    protected $gateways = [
-        'unitpay' => \Skylex\Larapay\Gateways\Unitpay::class,
-    ];
+    protected $gateways = [];
 
     /**
      * The list of created drivers.
