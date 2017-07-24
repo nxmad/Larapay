@@ -123,7 +123,10 @@ abstract class Gateway implements GatewayContract
      * Custom gateway logic instead redirect.
      * You can override this method in children class.
      */
-    public function customBehavior() {}
+    public function customBehavior()
+    {
+        // 
+    }
 
     /**
      * Prepare Transaction.
@@ -131,7 +134,10 @@ abstract class Gateway implements GatewayContract
      *
      * @param Transaction $transaction
      */
-    public function prepare(Transaction $transaction) {}
+    public function prepare(Transaction $transaction)
+    {
+        //
+    }
 
     /**
      * Determine if this gateway needs redirect.
