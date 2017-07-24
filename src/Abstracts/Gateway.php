@@ -125,7 +125,6 @@ abstract class Gateway implements GatewayContract
      */
     public function customBehavior()
     {
-        // 
     }
 
     /**
@@ -136,7 +135,6 @@ abstract class Gateway implements GatewayContract
      */
     public function prepare(Transaction $transaction)
     {
-        //
     }
 
     /**
