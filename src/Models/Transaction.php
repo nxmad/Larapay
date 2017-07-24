@@ -150,7 +150,7 @@ class Transaction extends Model
      * @param string $method
      * @param array $parameters
      *
-     * @return $this|mixed
+     * @return self|mixed
      */
     public function __call($method, $parameters)
     {

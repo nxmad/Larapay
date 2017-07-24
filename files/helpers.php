@@ -7,7 +7,7 @@ if (! function_exists('payments')) {
      *
      * @param string|null $gateway
      *
-     * @return \Illuminate\Foundation\Application|mixed
+     * @return \Skylex\Larapay\Contracts\Payments|\Skylex\Larapay\Abstracts\Gateway
      */
     function payments(string $gateway = null)
     {

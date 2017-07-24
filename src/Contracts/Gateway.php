@@ -17,6 +17,15 @@ interface Gateway
     public function sign(array $data): string;
 
     /**
+     * Process payment.
+     *
+     * @param Transaction $transaction
+     *
+     * @return mixed
+     */
+    public function interact(Transaction $transaction);
+
+    /**
      * Determine if request was sent originally from payment gateway.
      *
      * @param Request $request

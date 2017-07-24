@@ -9,13 +9,13 @@ trait Transactions
     /**
      * Setup transaction for subject without saving to database.
      *
-     * @param int    $amount
+     * @param float  $amount
      * @param array  $meta
      * @param string $state
      *
      * @return mixed
      */
-    public function setup(int $amount, array $meta = [], string $state = Transaction::STATE_PENDING)
+    public function setup(float $amount, array $meta = [], string $state = Transaction::STATE_PENDING)
     {
         $subject_type = __CLASS__;
         $subject_id   = $this->getPrimaryValue();
@@ -27,13 +27,13 @@ trait Transactions
     /**
      * Get new transaction record in database.
      *
-     * @param int    $amount
+     * @param float  $amount
      * @param array  $meta
      * @param string $state
      *
      * @return Transaction
      */
-    public function transaction(int $amount, array $meta = [], string $state = Transaction::STATE_PENDING): Transaction
+    public function transaction(float $amount, array $meta = [], string $state = Transaction::STATE_PENDING): Transaction
     {
         $transaction = $this->setup(...func_get_args());
 
