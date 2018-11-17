@@ -35,6 +35,13 @@
       "files/helpers.php"
     ]
   },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Skylex\\Larapay\\LarapayServiceProvider"
+      ]
+    }
+  },
   "scripts": {
     "test": "vendor/bin/phpunit"
   }
