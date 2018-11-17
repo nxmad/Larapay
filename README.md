@@ -1,47 +1,37 @@
-<p align="center"><img src="https://skylex.pro/uploads/larapay/logo.svg"></p>
+<p align="center"><img src="./Larapay.png"></p>
 
 <p align="center">
     <a href="./LICENSE.md">
         <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square" alt="Software License">
     </a>
-    <a href="https://packagist.org/packages/balatsky/larapay">
-        <img src="https://img.shields.io/packagist/dt/balatsky/larapay.svg?style=flat-square" alt="Total Downloads">
+    <a href="https://scrutinizer-ci.com/g/nxmad/Larapay/?branch=master">
+        <img src="https://scrutinizer-ci.com/g/nxmad/Larapay/badges/quality-score.png?b=master" alt="Scrutinizer Code Quality">
     </a>
-    <a href="https://packagist.org/packages/balatsky/larapay">
-        <img src="https://img.shields.io/packagist/v/balatsky/larapay.svg?style=flat-square" alt="Latest Version">
-    </a>
-    <a href="https://styleci.io/repos/88980904">
-        <img src="https://styleci.io/repos/88980904/shield" alt="StyleCI">
+    <a href="https://scrutinizer-ci.com/g/nxmad/Larapay/build-status/master">
+        <img src="https://scrutinizer-ci.com/g/nxmad/Larapay/badges/build.png?b=master" alt="Build Status">
     </a>
 </p>
 
-Install
+Installation
 -------
-1. Install via Composer
+- Require it using composer
     ``` bash
-    $ composer require balatsky/larapay
+    $ composer require nxmad/larapay
     ```
 
-2. Add the ServiceProvider to your `config/app.php` providers array:
+- Add the Service Provider to your `config/app.php` providers array (you can skip this step for Laravel 5.4+)
    ``` php
    Skylex\Larapay\LarapayServiceProvider::class,
    ```
 
-3. Publish default configuration file `larapay.php`
+- Publish default configuration file `larapay.php`
    ``` php
    $ php artisan vendor:publish
    ```
 
 Usage guide
 -----------
-- 🇷🇺 - [Русский](guide/ru.md)
-- 🇺🇸 - Coming soon
-
-Change log
-----------
-*Since 1.0*
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+Please see [Wiki](/wiki).
 
 Testing
 -------
@@ -52,7 +42,7 @@ $ composer test
 
 Credits
 -------
-- [Alex Balatsky](https://github.com/balatsky)
+- [Alex Balatsky](https://github.com/nxmad)
 - [All Contributors](../../contributors)
 
 License

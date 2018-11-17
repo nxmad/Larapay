@@ -1,8 +1,10 @@
 {
-  "name": "balatsky/larapay",
+  "name": "nxmad/larapay",
   "description": "Powerful multi-gateway payment processing library designed to make life easier in Laravel 5",
   "keywords": [
     "skylex",
+    "wallet",
+    "laravel",
     "larapay",
     "payments",
     "transactions"
@@ -10,8 +12,8 @@
   "license": "MIT",
   "homepage": "https://skylex.pro/dev/skylex",
   "support": {
-    "issues": "https://github.com/Balatsky/Larapay/issues",
-    "source": "https://github.com/Balatsky/Larapay"
+    "issues": "https://github.com/nxmad/Larapay/issues",
+    "source": "https://github.com/nxmad/Larapay"
   },
   "authors": [
     {
