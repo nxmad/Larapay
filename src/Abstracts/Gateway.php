@@ -38,6 +38,14 @@ abstract class Gateway implements GatewayContract
     protected $custom;
 
     /**
+     * Default gateway slug.
+     * You should override this property.
+     *
+     * @var string|bool
+     */
+    static $slug = false;
+
+    /**
      * Payment process method.
      * Possible values are below.
      *
@@ -105,7 +113,7 @@ abstract class Gateway implements GatewayContract
         }
 
         if ($this->method == self::LARAPAY_NO_REDIRECT) {
-            return $this->customBehavior();
+            return $this->customBehavior($transaction);
         }
 
         if ($this->method == self::LARAPAY_GET_REDIRECT) {
@@ -227,13 +235,9 @@ abstract class Gateway implements GatewayContract
      *
      * @return string
      */
-    public function getSlug(): string
+    static public function getSlug(): string
     {
-        if (isset($this->slug)) {
-            return $this->slug;
-        }
-
-        return str_slug(array_last(explode('\\', get_class($this))));
+        return self::$slug ?: str_slug(array_last(explode('\\', get_called_class())));
     }
 
     /**

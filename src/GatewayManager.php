@@ -27,7 +27,7 @@ class GatewayManager implements Contracts\Payments
 
         foreach ($this->config->get('larapay.gateways') as $implementation => $config) {
             if (class_exists($implementation)) {
-                $this->extend((new $implementation)->getSlug(), $implementation);
+                $this->extend($implementation::getSlug(), $implementation);
             }
         }
     }
