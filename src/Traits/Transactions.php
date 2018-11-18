@@ -15,17 +15,21 @@ trait Transactions
      *
      * @return mixed
      */
-    public function setup(float $amount, array $meta = [], string $state = Transaction::STATE_PENDING)
+    public function setup(float $amount, $meta = [], string $state = Transaction::STATE_PENDING): Transaction
     {
-        $subject_type = __CLASS__;
-        $subject_id   = $this->getPrimaryValue();
-        $class        = $this->getTransactionClass();
+        $class = $this->getTransactionClass();
+        $meta = is_scalar($meta) ? ['description' => $meta] : $meta;
 
-        return (new $class)->fill(compact('subject_id', 'subject_type', 'amount', 'meta', 'state'));
+        /**
+         * @var Transaction
+         */
+        $transaction = (new $class)
+            ->setSubject($this)
+            ->fill(compact('amount', 'meta', 'state'));
     }
 
     /**
-     * Get new transaction record in database.
+     * Setup transaction and save it immediately.
      *
      * @param float  $amount
      * @param array  $meta
@@ -49,13 +53,9 @@ trait Transactions
      */
     public function canAfford(Transaction $transaction): bool
     {
-        $field = self::KEEP;
+        $balance = self::KEEP ? $this->attributes[self::KEEP] : $this->recalculateBalance();
 
-        if (! $field) {
-            return true;
-        }
-
-        return $this->attributes[$field] >= abs($transaction->getAttributeFromArray('amount'));
+        return $balance >= abs($transaction->amount);
     }
 
     /**
