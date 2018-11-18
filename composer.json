@@ -30,7 +30,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Skylex\\Larapay\\": "src"
+      "Nxmad\\Larapay\\": "src"
     },
 
     "files": [
@@ -40,7 +40,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Skylex\\Larapay\\LarapayServiceProvider"
+        "Nxmad\\Larapay\\LarapayServiceProvider"
       ]
     }
   },

@@ -1,8 +1,8 @@
 <?php
 
-namespace Skylex\Larapay\Traits;
+namespace Nxmad\Larapay\Traits;
 
-use Skylex\Larapay\Models\Transaction;
+use Nxmad\Larapay\Models\Transaction;
 
 trait Transactions
 {

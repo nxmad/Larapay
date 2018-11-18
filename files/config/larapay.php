@@ -7,11 +7,11 @@ return [
     | Internal Transaction class
     |--------------------------------------------------------------------------
     |
-    | Must extend Skylex\Larapay\Models\Transaction
+    | Must extend Nxmad\Larapay\Models\Transaction
     |
     */
 
-    'transaction' => \Skylex\Larapay\Models\Transaction::class,
+    'transaction' => \Nxmad\Larapay\Models\Transaction::class,
 
     /*
     |--------------------------------------------------------------------------

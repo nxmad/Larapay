@@ -1,11 +1,11 @@
 <?php
 
-namespace Skylex\Larapay\Abstracts;
+namespace Nxmad\Larapay\Abstracts;
 
 use RuntimeException;
 use Illuminate\Config\Repository;
-use Skylex\Larapay\Models\Transaction;
-use Skylex\Larapay\Contracts\Gateway as GatewayContract;
+use Nxmad\Larapay\Models\Transaction;
+use Nxmad\Larapay\Contracts\Gateway as GatewayContract;
 
 abstract class Gateway implements GatewayContract
 {
@@ -122,8 +122,10 @@ abstract class Gateway implements GatewayContract
     /**
      * Custom gateway logic instead redirect.
      * You can override this method in children class.
+     *
+     * @param Transaction $transaction
      */
-    public function customBehavior()
+    public function customBehavior(Transaction $transaction)
     {
     }
 
@@ -227,6 +229,10 @@ abstract class Gateway implements GatewayContract
      */
     public function getSlug(): string
     {
+        if (isset($this->slug)) {
+            return $this->slug;
+        }
+
         return str_slug(array_last(explode('\\', get_class($this))));
     }
 

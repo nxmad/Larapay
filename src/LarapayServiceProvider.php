@@ -1,8 +1,8 @@
 <?php
 
-namespace Skylex\Larapay;
+namespace Nxmad\Larapay;
 
-use Skylex\Larapay\Contracts\Payments;
+use Nxmad\Larapay\Contracts\Payments;
 use Illuminate\Support\ServiceProvider;
 
 class LarapayServiceProvider extends ServiceProvider

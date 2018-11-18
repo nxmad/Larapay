@@ -1,9 +1,9 @@
 <?php
 
-namespace Skylex\Larapay\Contracts;
+namespace Nxmad\Larapay\Contracts;
 
 use Illuminate\Http\Request;
-use Skylex\Larapay\Models\Transaction;
+use Nxmad\Larapay\Models\Transaction;
 
 interface Gateway
 {

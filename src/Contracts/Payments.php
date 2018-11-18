@@ -1,8 +1,8 @@
 <?php
 
-namespace Skylex\Larapay\Contracts;
+namespace Nxmad\Larapay\Contracts;
 
-use Skylex\Larapay\Abstracts\Gateway;
+use Nxmad\Larapay\Abstracts\Gateway;
 
 interface Payments
 {

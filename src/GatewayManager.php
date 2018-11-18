@@ -1,10 +1,10 @@
 <?php
 
-namespace Skylex\Larapay;
+namespace Nxmad\Larapay;
 
 use RuntimeException;
 use InvalidArgumentException;
-use Skylex\Larapay\Abstracts\Gateway;
+use Nxmad\Larapay\Abstracts\Gateway;
 use Illuminate\Contracts\Config\Repository;
 
 class GatewayManager implements Contracts\Payments
