@@ -29,12 +29,11 @@ class LarapayServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
+            $this->getDatabasePath() => database_path(),
             $this->getConfigPath() => config_path('larapay.php'),
         ]);
 
         $this->loadViewsFrom(__DIR__ . '/../files/views', 'larapay');
-
-        $this->loadMigrationsFrom(__DIR__ . '/../files/database/migrations');
     }
 
     /**
@@ -45,5 +44,15 @@ class LarapayServiceProvider extends ServiceProvider
     protected function getConfigPath(): string
     {
         return __DIR__ . '/../files/config/larapay.php';
+    }
+
+    /**
+     * Get default database path.
+     *
+     * @return string
+     */
+    protected function getDatabasePath(): string
+    {
+        return __DIR__ . '/../files/database';
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use Nxmad\Larapay\Models\Transaction;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -29,11 +30,11 @@ class CreateTransactionsTable extends Migration
         $this->builder->create('transactions', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->integer('amount');
+            $table->decimal('amount', 10, 2);
 
             $table->json('meta')->nullable();
 
-            $table->enum('state', ['pending', 'successful', 'failed', 'canceled']);
+            $table->enum('state', Transaction::$allowedStates);
 
             $table->unsignedInteger('subject_id');
 

@@ -55,6 +55,8 @@ class GatewayManager implements Contracts\Payments
      */
     public function gateway(string $gateway): Gateway
     {
+        $gateway = mb_strtolower($gateway);
+
         if (! isset($this->created[$gateway])) {
             $this->created[$gateway] = $this->createGateway($gateway);
         }

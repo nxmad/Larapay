@@ -1,6 +1,6 @@
 <?php
 
-namespace Skylex\Larapay\Models;
+namespace Nxmad\Larapay\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,7 +31,7 @@ class Transaction extends Model
      *
      * @var array
      */
-    protected $allowedStates = [
+    static $allowedStates = [
         self::STATE_FAILED,
         self::STATE_PENDING,
         self::STATE_CANCELED,
@@ -55,27 +55,24 @@ class Transaction extends Model
     ];
 
     /**
-     * Get amount of transaction respecting accuracy.
+     * Determine if Subjects's balance is enough for transaction.
      *
-     * @param $value
-     *
-     * @return int|float
+     * @return bool
      */
-    public function getAmountAttribute($value)
-    {
-        return $value / pow(10, ($this->subject_type)::ACCURACY);
+    public function affordable(): bool {
+        return $this->subject->canAfford($this);
     }
 
     /**
-     * Set amount of transaction respecting accuracy.
+     * Set subject of transaction.
      *
-     * @param int|float $value
+     * @param $instance
      *
      * @return self
      */
-    public function setAmountAttribute($value): self
-    {
-        $this->attributes['amount'] = $value * pow(10, ($this->subject_type)::ACCURACY);
+    public function setSubject($instance): self {
+        $this->subject_id = $instance->id;
+        $this->subject_type = get_class($instance);
 
         return $this;
     }
