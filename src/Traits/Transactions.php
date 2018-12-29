@@ -26,6 +26,8 @@ trait Transactions
         $transaction = (new $class)
             ->setSubject($this)
             ->fill(compact('amount', 'meta', 'state'));
+
+        return $transaction;
     }
 
     /**
