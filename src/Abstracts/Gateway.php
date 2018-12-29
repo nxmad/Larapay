@@ -92,10 +92,11 @@ abstract class Gateway implements GatewayContract
      * Process payment.
      *
      * @param Transaction $transaction
+     * @param bool $stateless
      *
      * @return mixed
      */
-    public function interact(Transaction $transaction)
+    public function interact(Transaction $transaction, $stateless = false)
     {
         $this->prepare($transaction);
         $this->fill([
@@ -112,6 +113,10 @@ abstract class Gateway implements GatewayContract
             }
         }
 
+        if ($stateless) {
+            return $this->interactStateless($transaction);
+        }
+
         if ($this->method == self::LARAPAY_NO_REDIRECT) {
             return $this->customBehavior($transaction);
         }
@@ -125,6 +130,37 @@ abstract class Gateway implements GatewayContract
             'data'   => $this->custom->all(),
             'action' => $this->getInteractionUrl(),
         ]);
+    }
+
+    /**
+     * Stateless interaction.
+     *
+     * @param Transaction $transaction
+     *
+     * @return array
+     */
+    public function interactStateless(Transaction $transaction)
+    {
+        if ($this->method == self::LARAPAY_NO_REDIRECT)
+        {
+            return [
+                'type' => 'custom',
+                'data' => $this->customBehavior($transaction),
+            ];
+        }
+
+        $response = [
+            'type' => 'redirect',
+            'method' => $this->method,
+            'data' => $this->custom->all(),
+            'url' => $this->getInteractionUrl(),
+        ];
+
+        if ($this->method == self::LARAPAY_GET_REDIRECT) {
+            $response['url'] .= '?' . http_build_query($response['data']);
+        }
+
+        return $response;
     }
 
     /**
