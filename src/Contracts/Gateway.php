@@ -2,42 +2,25 @@
 
 namespace Nxmad\Larapay\Contracts;
 
-use Illuminate\Http\Request;
-use Nxmad\Larapay\Models\Transaction;
+use Nxmad\Larapay\Abstracts\Request;
 
 interface Gateway
 {
     /**
-     * Sign outcome request data.
-     *
-     * @param array $data
-     *
-     * @return string
-     */
-    public function sign(array $data): string;
-
-    /**
-     * Process payment.
-     *
-     * @param Transaction $transaction
-     *
-     * @return mixed
-     */
-    public function interact(Transaction $transaction);
-
-    /**
-     * Determine if request was sent originally from payment gateway.
+     * Sign request.
      *
      * @param Request $request
      *
-     * @return bool
+     * @return mixed
      */
-    public function handle(Request $request): bool;
+    public function sign(Request $request);
 
     /**
-     * Get gateway's interaction address.
+     * Get endpoint for request.
      *
-     * @return string
+     * @param Request $request
+     *
+     * @return mixed
      */
-    public function getInteractionUrl(): string;
+    public function getEndpoint(Request $request);
 }

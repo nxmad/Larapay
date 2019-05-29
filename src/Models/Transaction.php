@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nxmad\Larapay\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,33 +11,33 @@ class Transaction extends Model
     /**
      * The state means user failed payment for Transaction.
      */
-    const STATE_FAILED = 'failed';
+    const FAILED = 'failed';
 
     /**
      * The state means Transaction in pending.
      */
-    const STATE_PENDING = 'pending';
+    const PENDING = 'pending';
 
     /**
      * The state means Transaction was canceled by user or admin.
      */
-    const STATE_CANCELED = 'canceled';
+    const CANCELED = 'canceled';
 
     /**
      * The state means Transaction succeed.
      */
-    const STATE_SUCCESSFUL = 'successful';
+    const SUCCESSFUL = 'successful';
 
     /**
-     * The allowed Transaction states.
+     * The list of allowed Transaction states.
      *
      * @var array
      */
-    static $allowedStates = [
-        self::STATE_FAILED,
-        self::STATE_PENDING,
-        self::STATE_CANCELED,
-        self::STATE_SUCCESSFUL,
+    const STATES = [
+        self::FAILED,
+        self::PENDING,
+        self::CANCELED,
+        self::SUCCESSFUL,
     ];
 
     /**
@@ -59,7 +61,8 @@ class Transaction extends Model
      *
      * @return bool
      */
-    public function affordable(): bool {
+    public function affordable(): bool
+    {
         return $this->subject->canAfford($this);
     }
 
@@ -70,7 +73,8 @@ class Transaction extends Model
      *
      * @return self
      */
-    public function setSubject($instance): self {
+    public function setSubject($instance): self
+    {
         $this->subject_id = $instance->id;
         $this->subject_type = get_class($instance);
 
@@ -131,8 +135,18 @@ class Transaction extends Model
             $this->state = $state;
         }
 
-        if ($this->state == self::STATE_SUCCESSFUL) {
-            $this->subject->increment(($this->subject_type)::KEEP, $this->getAttributeFromArray('amount'));
+        if ($this->state == self::SUCCESSFUL) {
+            $type = 'increment';
+            $amount = $this->amount;
+
+            if ($amount < 0) {
+                $type = 'decrement';
+                $amount = abs($amount);
+            }
+
+            $field = ($this->subject_type)::KEEP;
+
+            $this->subject()->{$type}($field, $amount);
         }
 
         $this->save();
@@ -154,7 +168,7 @@ class Transaction extends Model
         if (strpos($method, 'make') !== false) {
             $state = mb_strtolower(str_replace('make', '', $method));
 
-            if (in_array($state, $this->allowedStates)) {
+            if (in_array($state, self::STATES)) {
                 return $this($state);
             }
         }

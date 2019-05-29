@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nxmad\Larapay;
 
 use RuntimeException;
@@ -17,22 +19,6 @@ class GatewayManager implements Contracts\Payments
     protected $config;
 
     /**
-     * Create a new manager instance.
-     *
-     * @param Repository $config
-     */
-    public function __construct(Repository $config)
-    {
-        $this->config = $config;
-
-        foreach ($this->config->get('larapay.gateways') as $implementation => $config) {
-            if (class_exists($implementation)) {
-                $this->extend($implementation::getSlug(), $implementation);
-            }
-        }
-    }
-
-    /**
      * The list of default implementations.
      *
      * @var array
@@ -45,6 +31,20 @@ class GatewayManager implements Contracts\Payments
      * @var array
      */
     protected $created = [];
+
+    /**
+     * Create a new manager instance.
+     *
+     * @param Repository $config
+     */
+    public function __construct(Repository $config)
+    {
+        $this->config = $config;
+
+        foreach ($this->config->get('larapay.gateways') as $slug => $implementation) {
+            $this->extend($slug, $implementation);
+        }
+    }
 
     /**
      * Get gateway module instance.
@@ -100,11 +100,11 @@ class GatewayManager implements Contracts\Payments
             throw new RuntimeException("Class [{$implementation}] was not found.");
         }
 
-        if (! $this->config->has("larapay.gateways.{$implementation}")) {
+        if (! $this->config->has("services.{$gateway}")) {
             throw new RuntimeException("No config found for {$implementation}.");
         }
 
-        $config = $this->config->get("larapay.gateways.{$implementation}");
+        $config = $this->config->get("services.{$gateway}");
 
         return new $implementation($config);
     }

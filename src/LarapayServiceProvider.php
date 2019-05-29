@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nxmad\Larapay;
 
 use Nxmad\Larapay\Contracts\Payments;

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nxmad\Larapay\Traits;
 
 use Nxmad\Larapay\Models\Transaction;
 
-trait Transactions
+trait HasTransactions
 {
     /**
      * Setup transaction for subject without saving to database.
@@ -15,7 +17,7 @@ trait Transactions
      *
      * @return mixed
      */
-    public function setup(float $amount, $meta = [], string $state = Transaction::STATE_PENDING): Transaction
+    public function setup(float $amount, $meta = [], string $state = Transaction::PENDING): Transaction
     {
         $class = $this->getTransactionClass();
         $meta = is_scalar($meta) ? ['description' => $meta] : $meta;
@@ -39,7 +41,7 @@ trait Transactions
      *
      * @return Transaction
      */
-    public function transaction(float $amount, array $meta = [], string $state = Transaction::STATE_PENDING): Transaction
+    public function transaction(float $amount, array $meta = [], string $state = Transaction::PENDING): Transaction
     {
         $transaction = $this->setup(...func_get_args());
 
@@ -68,7 +70,7 @@ trait Transactions
     public function recalculateBalance()
     {
         return $this->transactions()
-            ->where('state', Transaction::STATE_SUCCESSFUL)
+            ->where('state', Transaction::SUCCESSFUL)
             ->get()
             ->sum('amount');
     }

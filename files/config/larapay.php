@@ -15,12 +15,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Specified extensions settings
+    | List of implementations by slug
     |--------------------------------------------------------------------------
     |
-    | Vendor\Package\Gateway::class => [
-    |   'key' => 'value',
-    | ],
+    | 'slug' => Vendor\Package\Gateway::class,
     |
     */
 

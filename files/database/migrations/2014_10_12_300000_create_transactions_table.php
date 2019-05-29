@@ -28,13 +28,13 @@ class CreateTransactionsTable extends Migration
     public function up()
     {
         $this->builder->create('transactions', function (Blueprint $table) {
-            $table->increments('id');
+            $table->bigIncrements('id');
 
-            $table->decimal('amount', 10, 2);
+            $table->decimal('amount');
 
             $table->json('meta')->nullable();
 
-            $table->enum('state', Transaction::$allowedStates);
+            $table->enum('state', Transaction::STATES);
 
             $table->unsignedInteger('subject_id');
 

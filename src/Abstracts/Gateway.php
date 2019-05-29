@@ -1,81 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nxmad\Larapay\Abstracts;
 
-use RuntimeException;
 use Illuminate\Config\Repository;
 use Nxmad\Larapay\Models\Transaction;
+use Nxmad\Larapay\Requests\PaymentRequest;
+use Nxmad\Larapay\Requests\CallbackRequest;
+use Illuminate\Http\Request as HttpRequest;
 use Nxmad\Larapay\Contracts\Gateway as GatewayContract;
 
 abstract class Gateway implements GatewayContract
 {
     /**
-     * The list of aliases for payment gateway.
-     *
-     * @var array
-     */
-    protected $aliases = [];
-
-    /**
-     * The list of required request attributes.
-     *
-     * @var array
-     */
-    protected $required = [];
-
-    /**
-     * The general settings for payment processor, like secret key or merchant id.
+     * The list of gateway settings.
      *
      * @var Repository
      */
     protected $config;
 
     /**
-     * The temporary settings for payment processor, actual only in for this request, like payment description, etc.
+     * The list of gateway requests.
      *
-     * @var Repository
+     * @var array
      */
-    protected $custom;
+    protected $requests = [
+        'payment' => PaymentRequest::class,
+        'callback' => CallbackRequest::class,
+    ];
 
     /**
-     * Default gateway slug.
-     * You should override this property.
+     * Sign request.
      *
-     * @var string|bool
-     */
-    static $slug = false;
-
-    /**
-     * Payment process method.
-     * Possible values are below.
-     *
-     * @var string
-     */
-    protected $method = self::LARAPAY_GET_REDIRECT;
-
-    /**
-     * Classic redirection with GET parameters.
-     */
-    const LARAPAY_GET_REDIRECT = 'GET';
-
-    /**
-     * Redirect with POST data for old gateways (using hack with form).
-     */
-    const LARAPAY_POST_REDIRECT = 'POST';
-
-    /**
-     * No redirect method (e.g. for card payments)
-     */
-    const LARAPAY_NO_REDIRECT = '_';
-
-    /**
-     * Sign outcome request (insert request signature in request parameters).
-     *
-     * @param array $data
+     * @param Request $request
      *
      * @return string
      */
-    abstract public function sign(array $data): string;
+    abstract public function sign(Request $request): string;
 
     /**
      * Gateway constructor.
@@ -84,213 +46,112 @@ abstract class Gateway implements GatewayContract
      */
     public function __construct(array $config = [])
     {
-        $this->custom = new Repository;
         $this->config = new Repository($config);
     }
 
     /**
-     * Process payment.
+     * Override gateway config values.
      *
-     * @param Transaction $transaction
-     * @param bool $stateless
+     * @param array|string $key
+     * @param mixed $value
      *
      * @return mixed
      */
-    public function interact(Transaction $transaction, $stateless = false)
+    public function config($key, $value = null)
     {
-        $this->prepare($transaction);
-        $this->fill([
-            'amount'      => $transaction->getAmount(),
-            'description' => $transaction->getDescription(),
-            'id'          => $transaction->getPrimaryValue(),
-        ]);
-
-        $this->signature = $this->sign($this->custom->all());
-
-        foreach ($this->required as $field) {
-            if (! $this->custom->has($this->getAlias($field))) {
-                throw new RuntimeException("Required field [{$field}] is not presented.");
+        if (is_array($key)) {
+            foreach ($key as $k => $v) {
+                $this->config($k, $v);
             }
+        } elseif (! is_null($value)) {
+            return $this->config->set($key, $value);
         }
 
-        if ($stateless) {
-            return $this->interactStateless($transaction);
-        }
-
-        if ($this->method == self::LARAPAY_NO_REDIRECT) {
-            return $this->customBehavior($transaction);
-        }
-
-        if ($this->method == self::LARAPAY_GET_REDIRECT) {
-            return redirect()->away($this->getInteractionUrl() . '?' . http_build_query($this->custom->all()));
-        }
-
-        return view('larapay::form', [
-            'method' => 'POST',
-            'data'   => $this->custom->all(),
-            'action' => $this->getInteractionUrl(),
-        ]);
+        return $this->config->get($key);
     }
 
     /**
-     * Stateless interaction.
-     *
-     * @param Transaction $transaction
-     *
-     * @return array
-     */
-    public function interactStateless(Transaction $transaction)
-    {
-        if ($this->method == self::LARAPAY_NO_REDIRECT)
-        {
-            return [
-                'type' => 'custom',
-                'data' => $this->customBehavior($transaction),
-            ];
-        }
-
-        $response = [
-            'type' => 'redirect',
-            'method' => $this->method,
-            'data' => $this->custom->all(),
-            'url' => $this->getInteractionUrl(),
-        ];
-
-        if ($this->method == self::LARAPAY_GET_REDIRECT) {
-            $response['url'] .= '?' . http_build_query($response['data']);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Custom gateway logic instead redirect.
-     * You can override this method in children class.
-     *
-     * @param Transaction $transaction
-     */
-    public function customBehavior(Transaction $transaction)
-    {
-    }
-
-    /**
-     * Prepare Transaction.
-     * You can override this method in children class.
-     *
-     * @param Transaction $transaction
-     */
-    public function prepare(Transaction $transaction)
-    {
-    }
-
-    /**
-     * Determine if this gateway needs redirect.
-     *
+     * @param string $request
      * @return bool
      */
-    public function needRedirect()
+    public function hasRequest(string $request)
     {
-        return $this->method != self::LARAPAY_NO_REDIRECT;
+        return array_key_exists($request, $this->requests);
     }
 
     /**
-     * Fill custom parameters.
-     *
-     * @param array $parameters
-     *
-     * @return Gateway
+     * @param string $request
+     * @return mixed|string
      */
-    public function fill(array $parameters): self
+    public function getRequest(string $request)
     {
-        foreach ($parameters as $key => $value) {
-            $this->set($key, $value);
-        }
-
-        return $this;
+        return $this->hasRequest($request) ? $this->requests[$request] : $request;
     }
 
     /**
-     * Set custom field value respecting aliases.
-     *
-     * @param $field
-     * @param $value
+     * @param array|string $name
+     * @param null|Request $implementation
      *
      * @return self
      */
-    public function set($field, $value = null): self
+    public function addRequest($name, $implementation = null): self
     {
-        if (is_array($field)) {
-            return $this->fill($field);
+        if (is_array($name) && is_null($implementation)) {
+            foreach ($name as $key => $value) {
+                $this->addRequest($key, $value);
+            }
+
+            return $this;
         }
 
-        $this->custom->set($this->getAlias($field), $value);
+        $this->requests[$name] = $implementation;
 
         return $this;
     }
 
     /**
-     * Magic set method.
-     *
-     * @param $name
-     * @param $value
-     *
-     * @return Gateway
-     */
-    public function __set($name, $value)
-    {
-        return self::set(...func_get_args());
-    }
-
-    /**
-     * Get custom field value respecting aliases.
-     *
-     * @param string  $field
-     * @param mixed   $default
+     * @param string $request
+     * @param mixed $data
      *
      * @return mixed
      */
-    public function get(string $field, $default = null)
+    public function call(string $request, $data = null): Request
     {
-        return $this->custom->get($this->getAlias($field), $default);
-    }
+        $callable = $this->getRequest($request);
 
-    /**
-     * Magic get method.
-     *
-     * @param $name
-     *
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return self::get(...func_get_args());
-    }
+        /**
+         * @var Request $request
+         */
+        $request = new $callable($this, $data instanceof HttpRequest ? $data : null);
 
-    /**
-     * Get slug of gateway based on class name.
-     *
-     * @return string
-     */
-    static public function getSlug(): string
-    {
-        return self::$slug ?: str_slug(array_last(explode('\\', get_called_class())));
-    }
-
-    /**
-     * Determine if field has alias for payment gateway.
-     * E.g., some gateways can accept description in $_GET parameter vendorPrefix_desc,
-     * so we need conversion: 'description' => 'vendorPrefix_desc'.
-     *
-     * @param string $field
-     *
-     * @return string
-     */
-    protected function getAlias(string $field): string
-    {
-        if (isset($this->aliases[$field])) {
-            return $this->aliases[$field];
+        if (is_array($data)) {
+            $request->fill($data);
         }
 
-        return $field;
+        return $request;
+    }
+
+    /**
+     * @param $transaction
+     *
+     * @return mixed
+     */
+    public function payment(Transaction $transaction)
+    {
+        return $this->call('payment', [
+            Request::AMOUNT => $transaction->getAmount(),
+            Request::ID => $transaction->getPrimaryValue(),
+            Request::DESCRIPTION => $transaction->getDescription(),
+        ]);
+    }
+
+    /**
+     * @param HttpRequest $request
+     *
+     * @return Request
+     */
+    public function callback(HttpRequest $request)
+    {
+        return $this->call('callback', $request);
     }
 }
