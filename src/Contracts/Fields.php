@@ -7,6 +7,9 @@ interface Fields
     // Internal payment id
     const ID = 'id';
 
+    // Public merchant id
+    const PUBLIC = 'public';
+
     // External payment id
     const UID = 'uid';
 

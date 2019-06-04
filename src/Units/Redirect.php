@@ -6,8 +6,8 @@ namespace Nxmad\Larapay\Units;
 
 class Redirect
 {
-    const GET = 'GET_REDIRECT';
-    const POST = 'POST_REDIRECT';
+    const GET = 'GET';
+    const POST = 'POST';
 
     /**
      * @var string

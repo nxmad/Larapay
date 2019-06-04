@@ -100,12 +100,6 @@ class GatewayManager implements Contracts\Payments
             throw new RuntimeException("Class [{$implementation}] was not found.");
         }
 
-        if (! $this->config->has("services.{$gateway}")) {
-            throw new RuntimeException("No config found for {$implementation}.");
-        }
-
-        $config = $this->config->get("services.{$gateway}");
-
-        return new $implementation($config);
+        return new $implementation($this->config->get("services.{$gateway}", []));
     }
 }

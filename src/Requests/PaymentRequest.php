@@ -16,6 +16,10 @@ class PaymentRequest extends Request
     {
         parent::send();
 
+        if ($this->gateway->config('public')) {
+            $this->set(Request::PUBLIC, $this->gateway->config('public'));
+        }
+
         return $this->redirect();
     }
 }

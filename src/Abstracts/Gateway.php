@@ -115,18 +115,14 @@ abstract class Gateway implements GatewayContract
      *
      * @return mixed
      */
-    public function call(string $request, $data = null): Request
+    public function call(string $request, $data = []): Request
     {
         $callable = $this->getRequest($request);
 
         /**
          * @var Request $request
          */
-        $request = new $callable($this, $data instanceof HttpRequest ? $data : null);
-
-        if (is_array($data)) {
-            $request->fill($data);
-        }
+        $request = new $callable($this, $data);
 
         return $request;
     }

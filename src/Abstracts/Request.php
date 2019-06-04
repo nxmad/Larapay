@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Nxmad\Larapay\Abstracts;
 
-use Nxmad\Larapay\Units\Redirect;
 use Illuminate\Config\Repository;
+use Nxmad\Larapay\Units\Redirect;
 use Nxmad\Larapay\Contracts\Fields;
 use Nxmad\Larapay\Traits\HasMutations;
 use Illuminate\Http\Request as HttpRequest;
@@ -26,11 +26,11 @@ abstract class Request implements Fields
     protected $gateway;
 
     /**
-     * The HTTP request instance if presented.
+     * Original HTTP request if presented.
      *
-     * @var HttpRequest|null
+     * @var null|HttpRequest
      */
-    protected $request;
+    protected $http = null;
 
     /**
      * The list of required fields by request.
@@ -57,37 +57,53 @@ abstract class Request implements Fields
      * Request constructor.
      *
      * @param Gateway $gateway
-     * @param HttpRequest|null $request
+     * @param array|HttpRequest $data
      */
-    public function __construct(Gateway $gateway, ?HttpRequest $request = null)
+    public function __construct(Gateway $gateway, $data = [])
     {
         $this->gateway = $gateway;
-        $this->request = $request;
         $this->query = new Repository;
 
-        if ($request) {
-            $this->fill($request->all());
+        if (is_array($data)) {
+            $this->fill($data);
+        }
+
+        if ($data instanceof HttpRequest)
+        {
+            $this->http = $data;
+
+            $this->setRaw($data->all());
         }
     }
 
     /**
-     * Get original query before mutation.
+     * Get original http request.
      *
-     * @return Repository
+     * @return HttpRequest
      */
-    public function getOriginal()
+    public function getHttpRequest()
     {
-        return $this->query;
+        return $this->http;
     }
 
     /**
-     * Get endpoint for current request.
+     * You can override endpoint method.
      *
      * @return mixed
      */
     public function endpoint()
     {
         return $this->gateway->getEndpoint($this);
+    }
+
+    /**
+     * You can override sign method.
+     *
+     * @return string
+     */
+    public function sign()
+    {
+        return $this->gateway->sign($this);
     }
 
     /**
@@ -114,7 +130,7 @@ abstract class Request implements Fields
     public function send()
     {
         if (in_array(self::SIGNATURE, $this->required)) {
-            $this->set(self::SIGNATURE, $this->gateway->sign($this));
+            $this->set(self::SIGNATURE, $this->sign());
         }
 
         foreach ($this->required as $field) {

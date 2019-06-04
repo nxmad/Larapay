@@ -16,13 +16,6 @@ trait HasMutations
     protected $query;
 
     /**
-     * The mutated query of request.
-     *
-     * @var Repository
-     */
-    protected $mutated;
-
-    /**
      * Magic get method.
      *
      * @param $name
@@ -48,6 +41,26 @@ trait HasMutations
     }
 
     /**
+     * Get raw query.
+     *
+     * @return array
+     */
+    public function getRaw()
+    {
+        return $this->query->all();
+    }
+
+    /**
+     * Set raw query.
+     *
+     * @param $query
+     */
+    public function setRaw($query)
+    {
+        $this->query = $query instanceof Repository ? $query : new Repository($query);
+    }
+
+    /**
      * Determine if request has a field.
      *
      * @param string $field
@@ -56,7 +69,7 @@ trait HasMutations
      */
     public function has(string $field): bool
     {
-        return $this->mutated->has($field);
+        return $this->get($field) !== null;
     }
 
     /**
@@ -75,11 +88,15 @@ trait HasMutations
             return $this->{$accessorName}();
         }
 
-        return $this->mutated->get($field, $default);
+        if (isset($this->aliases[$field])) {
+            $field = $this->aliases[$field];
+        }
+
+        return $this->query->get($field, $default);
     }
 
     /**
-     * Set request field and then mutate.
+     * Set request field.
      *
      * @param $field
      * @param $value
@@ -92,21 +109,41 @@ trait HasMutations
             return $this->fill($field);
         }
 
-        $mutatorName = 'set' . $this->camelize($field);
+        $accessorName = 'set' . $this->camelize($field);
 
-        if (method_exists($this, $mutatorName)) {
-            $result = $this->{$mutatorName}($value);
+        if (method_exists($this, $accessorName)) {
+            $value = $this->{$accessorName}($value);
+        }
 
-            $this->queryHasChanged();
-
-            return $result;
+        if (isset($this->aliases[$field])) {
+            $field = $this->aliases[$field];
         }
 
         $this->query->set($field, $value);
 
-        $this->queryHasChanged();
-
         return $this;
+    }
+
+    /**
+     * @param mixed ...$fields
+     */
+    public function remove(...$fields)
+    {
+        foreach ($fields as $field)
+        {
+            if (is_array($field))
+            {
+                $this->remove(...$field);
+
+                continue;
+            }
+
+            if (isset($this->aliases[$field])) {
+                $field = $this->aliases[$field];
+            }
+
+            unset($this->query[$field]);
+        }
     }
 
     /**
@@ -122,48 +159,31 @@ trait HasMutations
             $this->set($key, $value);
         }
 
-        $this->queryHasChanged();
-
         return $this;
     }
 
     /**
      * Get full mutated query.
      *
+     * @param bool $object
+     *
+     * @return array|\stdClass
+     */
+    public function all($object = true)
+    {
+        $arr = $this->toArray();
+
+        return $object ? (object) $arr : $arr;
+    }
+
+    /**
+     * Request data to array.
+     *
      * @return array
      */
-    public function all()
+    public function toArray()
     {
-        return $this->mutated->all();
-    }
-
-    /**
-     * Update mutated fields.
-     */
-    protected function queryHasChanged()
-    {
-        $this->mutated = $this->mutate();
-    }
-
-    /**
-     * Get mutated query.
-     *
-     * @return Repository
-     */
-    public function mutate()
-    {
-        $result = [];
-        $aliases = $this->aliases;
-
-        foreach ($this->flat() as $key => $value) {
-            if (array_key_exists($key, $aliases)) {
-                $key = $aliases[$key];
-            }
-
-            $result[$key] = $value;
-        }
-
-        return new Repository($result);
+        return $this->query->all();
     }
 
     /**
@@ -183,7 +203,7 @@ trait HasMutations
         }
 
         foreach ($query as $key => $value) {
-            if (is_array($value)) {
+            if (is_array($value) && $this->isAssoc($value)) {
                 $result = array_merge($result, $this->flat($value, "{$prefix}{$key}."));
             } else {
                 $result[$prefix . $key] = $value;
@@ -191,5 +211,21 @@ trait HasMutations
         }
 
         return $result;
+    }
+
+    /**
+     * Determine if array is associative.
+     *
+     * @param array $array
+     *
+     * @return bool
+     */
+    private function isAssoc(array $array)
+    {
+        if ([] === $array) {
+            return false;
+        }
+
+        return array_keys($array) !== range(0, count($array) - 1);
     }
 }
