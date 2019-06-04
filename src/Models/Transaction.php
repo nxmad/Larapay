@@ -123,7 +123,7 @@ class Transaction extends Model
     }
 
     /**
-     * Update state, without respecting balance.
+     * Invoke() to change the state.
      *
      * @param string|null $state
      *
@@ -131,22 +131,16 @@ class Transaction extends Model
      */
     public function __invoke(string $state = null)
     {
+        if ($this->exists && $this->state === $state) {
+            return $this;
+        }
+
         if (! is_null($state)) {
             $this->state = $state;
         }
 
-        if ($this->state == self::SUCCESSFUL) {
-            $type = 'increment';
-            $amount = $this->amount;
-
-            if ($amount < 0) {
-                $type = 'decrement';
-                $amount = abs($amount);
-            }
-
-            $field = ($this->subject_type)::KEEP;
-
-            $this->subject()->{$type}($field, $amount);
+        if ($this->state === self::SUCCESSFUL && defined($this->subject_type . '::KEEP')) {
+            $this->subject()->increment(($this->subject_type)::KEEP, $this->amount);
         }
 
         $this->save();
